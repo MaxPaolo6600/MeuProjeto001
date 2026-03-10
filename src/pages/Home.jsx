@@ -1,10 +1,51 @@
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header"
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient"
+
+import mais from "../assets/mais.png"
 
 export default function Home() {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [post, setPost] = useState([]);
+    const [formData, setFormData] = useState({ titulo_post: "", conteudo_post: "" });
+
+    useEffect(() => { buscarPosts(); }, []);
+
+    async function buscarPosts() {
+        const { data, error } = await supabase
+            .from("posts")
+            .select("*")
+        if (error) {
+            console.log(error)
+            return;
+        }
+        setPost(data)
+    }
+    async function criarPost() {
+        try {
+            const { data, error } = await supabase
+                .from("posts")
+                .insert([
+                    {
+                        titulo_post: formData.titulo_post,
+                        conteudo_post: formData.conteudo_post
+                    }
+                ]);
+            if (error) {
+                return;
+            }
+            setFormData({
+                titulo_post: "",
+                conteudo_post: ""
+            });
+            setOpen(false);
+            await buscarPosts();
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <div className="min-h-screen bg-[#262B2D]">
@@ -20,14 +61,24 @@ export default function Home() {
                     </button>
                 </div>
                 <div className="mt-30">
-                    <h1>Seus Posts</h1>
-                    <div className="bg-[#262B2D] border border-[#212121] rounded-xl shadow-md w-100 h-75 flex justify-center items-center">
-                        <button
-                            onClick={() => setOpen(true)}
-                            className="rounded-full border border-[#137FA8] w-20 h-20 flex items-center justify-center text-3xl hover:bg-[#137FA8]/20 transition"
-                        >
-                            ➕
-                        </button>
+                    <h1 className="text-white font-bold text-4xl mb-4">Seus Posts</h1>
+                    <div className="flex">
+                        {post.map((postes) => (
+                            <div key={postes.id} className="bg-[#262B2D] border border-[#212121] rounded-xl shadow-md w-100 h-75">
+                                <div className="m-5">
+                                    <h1 className="text-white text-2xl font-semibold rounded-2xl bg-[#212121] p-2">{postes.titulo_post}</h1>
+                                    <h1 className="text-white mt-5 border border-[#137FA8] rounded-2xl p-2">{postes.conteudo_post}</h1>
+                                </div>
+                            </div>
+                        ))}
+                        <div className="bg-[#262B2D] border border-[#212121] rounded-xl shadow-md w-100 h-75 flex justify-center items-center">
+                            <button
+                                onClick={() => setOpen(true)}
+                                className="rounded-full border border-[#137FA8] w-20 h-20 flex items-center justify-center text-3xl hover:bg-[#137FA8]/20 transition"
+                            >
+                                <img src={mais} alt="mais" className="w-10" />
+                            </button>
+                        </div>
                     </div>
                     {open && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
@@ -49,15 +100,24 @@ export default function Home() {
                                     </label>
                                     <input
                                         type="text"
+                                        value={formData.titulo_post}
                                         placeholder="Digite o título..."
+                                        onChange={(e) => setFormData({ ...formData, titulo_post: e.target.value })}
                                         className="bg-[#262B2D] border border-[#212121] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#137FA8]"
                                     />
                                     <label className="text-white/80 text-sm">
                                         Conteúdo do post
                                     </label>
-                                    <textarea name="" id="" placeholder="Digite o conteúdo do Post" className="bg-[#262B2D] border border-[#212121] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#137FA8]"></textarea>
+                                    <textarea
+                                        value={formData.conteudo_post}
+                                        placeholder="Digite o conteúdo do Post"
+                                        onChange={(e) => setFormData({ ...formData, conteudo_post: e.target.value })}
+                                        className="bg-[#262B2D] border border-[#212121] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#137FA8]"
+                                    ></textarea>
                                 </div>
-                                <button className="mt-6 w-full bg-[#137FA8] hover:bg-[#0f6b8e] transition rounded-lg py-2 text-white font-medium">
+                                <button
+                                    onClick={criarPost}
+                                    className="mt-6 w-full bg-[#137FA8] hover:bg-[#0f6b8e] transition rounded-lg py-2 text-white font-medium">
                                     Publicar
                                 </button>
                             </div>
