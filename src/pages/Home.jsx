@@ -50,7 +50,7 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-[#262B2D]">
             <Header />
-            <main className="container mx-auto">
+            <main className="container mx-auto px-10">
                 <div className="mt-20 flex items-center flex-col">
                     <h1 className="font-semibold text-3xl text-white">Essa é a página Home, crie sua conta</h1>
                     <button
