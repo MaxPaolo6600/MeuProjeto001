@@ -62,7 +62,7 @@ export default function Home() {
                 </div>
                 <div className="mt-30">
                     <h1 className="text-white font-bold text-4xl mb-4">Seus Posts</h1>
-                    <div className="flex">
+                    <div className="grid grid-cols-3 gap-4">
                         {post.map((postes) => (
                             <div key={postes.id} className="bg-[#262B2D] border border-[#212121] rounded-xl shadow-md w-100 h-75">
                                 <div className="m-5">
